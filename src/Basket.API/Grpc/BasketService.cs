@@ -2,6 +2,7 @@
 using eShop.Basket.API.Repositories;
 using eShop.Basket.API.Extensions;
 using eShop.Basket.API.Model;
+using Microsoft.AspNetCore.Authorization;
 
 namespace eShop.Basket.API.Grpc;
 

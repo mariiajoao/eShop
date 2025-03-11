@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: always
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - eShopNetwork
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - "6831:6831/udp" # UDP agent
+      - "6832:6832/udp" # UDP agent
+      - "5778:5778" # HTTP agent
+      - "16686:16686" # HTTP query
+      - "4317:4317" # HTTP collector
+      - "4318:4318" # HTTP collector
+      - "14250:14250" # HTTP collector
+      - "14268:14268" # HTTP collector
+      - "14269:14269"
+      - "9411:9411" # HTTP collector
+    environment:
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - eShopNetwork
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: always
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-clock-panel, grafana-simple-json-datasource, grafana-piechart-panel
+    depends_on:
+      - prometheus
+      - jaeger
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - eShopNetwork
+
+
+networks:
+  eShopNetwork:
+    driver: bridge

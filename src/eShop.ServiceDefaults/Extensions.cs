@@ -8,6 +8,10 @@ using Microsoft.Extensions.Logging;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using OpenTelemetry.Instrumentation.SqlClient;
+// using OpenTelemetry.Exporter.Prometheus;
+// using OpenTelemetry.Exporter.Prometheus.AspNetCore;
+using eShop.ServiceDefaults.Telemetry;
 
 namespace eShop.ServiceDefaults;
 
@@ -61,7 +65,9 @@ public static partial class Extensions
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
-                    .AddMeter("Experimental.Microsoft.Extensions.AI");
+                    // .AddPrometheusExporter()
+                    .AddMeter("Experimental.Microsoft.Extensions.AI")
+                    .AddMeter("ordering-api");
             })
             .WithTracing(tracing =>
             {
@@ -71,10 +77,15 @@ public static partial class Extensions
                     tracing.SetSampler(new AlwaysOnSampler());
                 }
 
+                // Add the PII scrubber processor
+                tracing.AddProcessor<PiiScrubberProcessor>();
+
                 tracing.AddAspNetCoreInstrumentation()
                     .AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddSource("Experimental.Microsoft.Extensions.AI");                    
+                    .AddSqlClientInstrumentation()
+                    .AddSource("Experimental.Microsoft.Extensions.AI")
+                    .AddSource("ordering-api");
             });
 
         builder.AddOpenTelemetryExporters();
@@ -112,17 +123,26 @@ public static partial class Extensions
 
         // Adding health checks endpoints to applications in non-development environments has security implications.
         // See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.
-        if (app.Environment.IsDevelopment())
-        {
-            // All health checks must pass for app to be considered ready to accept traffic after starting
-            app.MapHealthChecks("/health");
+        // if (app.Environment.IsDevelopment())
+        // {
+        //     // All health checks must pass for app to be considered ready to accept traffic after starting
+        //     app.MapHealthChecks("/health");
 
-            // Only health checks tagged with the "live" tag must pass for app to be considered alive
-            app.MapHealthChecks("/alive", new HealthCheckOptions
-            {
-                Predicate = r => r.Tags.Contains("live")
-            });
-        }
+        //     // Only health checks tagged with the "live" tag must pass for app to be considered alive
+        //     app.MapHealthChecks("/alive", new HealthCheckOptions
+        //     {
+        //         Predicate = r => r.Tags.Contains("live")
+        //     });
+        // }
+
+        // All health checks must pass for app to be considered ready to accept traffic after starting
+        app.MapHealthChecks("/health");
+
+        // Only health checks tagged with the "live" tag must pass for app to be considered alive
+        app.MapHealthChecks("/alive", new HealthCheckOptions
+        {
+            Predicate = r => r.Tags.Contains("live")
+        });
 
         return app;
     }
