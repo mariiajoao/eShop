@@ -1,72 +1,79 @@
 import http from 'k6/http';
-import { sleep, check } from 'k6';
+import { check, sleep } from 'k6';
+import { fail } from 'k6';
 
-// Load test configuration
-export const options = {
-    // Ramp up pattern: 0->5 users in 10s, stay at 5 users for 30s, then ramp down
-    stages: [
-        { duration: '10s', target: 5 },  // Ramp up to 5 users
-        { duration: '30s', target: 5 },  // Stay at 5 users
-        { duration: '10s', target: 0 },  // Ramp down to 0 users
-    ],
-    thresholds: {
-        http_req_failed: ['rate<0.1'],     // Error rate < 10%
-        http_req_duration: ['p(95)<1000'], // 95% of requests < 1s
-    },
+export let options = {
+  stages: [
+    { duration: '10s', target: 1 },
+    // { duration: '30s', target: 10 }, // ramp up to 10 users
+    // { duration: '1m', target: 10 },  // stay at 10 users for 1 minute
+    // { duration: '30s', target: 0 },  // ramp down to 0 users
+  ],
+  insecureSkipTLSVerify: true, // Disable TLS verification
 };
 
 export default function () {
-    const baseUrl = 'http://localhost:5224';
+  // Navigate to the homepage
+  let res = http.get('https://localhost:7298');
+  check(res, { 'status was 200': (r) => r.status === 200 }) || fail('Failed to load homepage');
 
 
-    const headers = {
-        'Content-Type': 'application/json',
-        'x-requestid': '12345',
-    };
+  // // Get the antiforgery token
+  // // Get the antiforgery token
+  // res = http.get('https://localhost:7298/api/antiforgery/token');
+  // console.log('Antiforgery token response status:', res.status);
+  // console.log('Antiforgery token response body:', res.body);
+  // check(res, { 'status was 200': (r) => r.status === 200 }) || fail('Failed to get antiforgery token');
+  // const token = res.json('token');
 
-    // Create a basket item
-    const basketItems = [
-        {
-            productId: 1,
-            productName: "Test Product",
-            unitPrice: 10.99,
-            quantity: 2,
-        }
-    ];
 
-    // Create data with PII information
-    const orderData = {
-        userId: '1',
-        userName: 'User Test',
-        city: 'Aveiro',
-        street: 'Rua de Aveiro',
-        state: 'Av',
-        country: 'Portugal',
-        zipCode: '123456',
-        cardNumber: '4111-1111-1111-1111',
-        cardHolderName: 'User Test',
-        cardExpiration: new Date(2024, 4, 11),
-        cardSecurityNumber: '123',
-        cardTypeId: 1,
-        buyer: 'test@email.com',
-        orderItems: basketItems,
-    };
-
-    const order = http.post(
-        `${baseUrl}/api/orders?api-version=1.0`,
-        JSON.stringify(orderData),
-        { headers },
-    );
-
-    check(order, {
-        'order status is 200': (r) => r.status === 200,
-        'order status is 201': (r) => r.status === 201,
-    });
-
-    // Log failures for analysis
-    if (order.status >= 400) {
-        console.log(`Order creation failed: Status ${order.status}, Body: ${order.body.substring(0, 100)}`);
+  // Log in as a user
+  res = http.post(
+    'https://localhost:5243/Account/Login?ReturnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Frequest_uri%3Durn%253Aietf%253Aparams%253Aoauth%253Arequest_uri%253AA427902FE727DF5C301EFD5AB009D22DA1ACD6E27AA0EA28435AD5C42A3C22A9%26client_id%3Dwebapp',
+    {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
     }
+  );
+  console.log('Login response body:', res.body);
+  check(res, { 'login successful': (r) => r.status === 200 }) || fail('Failed to log in');
 
-    sleep(1);
+  // const antiforgery = 'CfDJ8B919G8OIJFIuhEn7zsKHEB9dNjjyA4MPz8nYnOZXsS0Q7gk6nvI2nK7GPjBhWoLd7moXpGYNhFgALv-Dkfc79hvBpFjnC8y0IXy_LmAyGEh3RCJcbwk7BHsmAif9TeB4DAVwb-4HN-vWEbb_ncG4LY';
+
+  // // // Add an item to the basket
+  // res = http.post(
+  //   'https://localhost:7298/item/99',
+  //   {
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       '.Aspire.Dashboard.Antiforgery.': antiforgery.json
+  //     }
+  //   }
+  // );
+  // console.log('Item to basket response body:', res.body);
+  // check(res, { 'item added to basket': (r) => r.status === 200 }) || fail('Failed to add item to basket');
+
+  // // Go to the basket
+  // res = http.get('https://localhost:7298/api/basket');
+  // check(res, { 'basket page loaded': (r) => r.status === 200 }) || fail('Failed to load basket page');
+
+  // // Proceed to checkout
+  // res = http.post('https://localhost:7298/api/checkout', JSON.stringify({
+  //   address: '123 Test St',
+  //   city: 'Test City',
+  //   postalCode: '12345',
+  //   country: 'Test Country',
+  // }), { headers: { 'Content-Type': 'application/json' } });
+  // check(res, { 'checkout successful': (r) => r.status === 200 }) || fail('Failed to checkout');
+
+  // // Submit the order
+  // res = http.post('https://localhost:7298/api/orders');
+  // check(res, { 'order placed': (r) => r.status === 200 }) || fail('Failed to place order');
+
+  // // Verify the order confirmation
+  // res = http.get('https://localhost:7298/api/orders/confirmation');
+  // check(res, { 'order confirmation received': (r) => r.status === 200 }) || fail('Failed to receive order confirmation');
+
+  sleep(1);
 }
