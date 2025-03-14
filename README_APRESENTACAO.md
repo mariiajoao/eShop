@@ -1,51 +1,53 @@
-# Integrating OpenTelemetry & Security in eShop - Projeto A.S.
+# Integrating OpenTelemetry & Security in eShop - S.A. Project
 Maria Sardinha (108756)
 
-Cadeira: Arquiteturas de Software
+Course: Software Architecture
 
-### 1. Objetivo:
-Este projeto tem como objetivo a implementação de tracing com **OpenTelemetry** no repositório **eShop**, de forma a que o fluxo de execução seja visível e que seja feita uma proteção adequada de dados sensíveis.
+### 1. Objectives:
+This project has as objective enhancing the **eShop** e-commerce system by integrating **OpenTelemetry tracing** for a selected feature, while ensuring secutiry best practices (e.g.: masking sensitive information data). Observability is also improved using **Grafana dashboards** to visualize traces and metrics.
 
-**Principais objetivos:**
-- Implementar Tracing duma feature com OpenTelemtry.
-- Garantir que dados sensíveis sejam mascarados/excluídos dos logs e traces.
-- Configurar um dashboard no Grafana para visualizar métricas e traces.
-- (Opcional) Implementar segurança adicional, mascarando colunas da BD.
+**Principal Objectives:**
+- Implement Tracing of a features using OpenTelemtry.
+- Ensure that sensitive data is masked/excluded from logs and traces.
+- Configure a dashboard in Grafana to visualize metrics and traces.
+- (Optional - not implemented) Implement additional security by masking DB columns.
 
 
-### 2. Implementação:
+### 2. Imolementation:
 
-1) Fork e Clone do repositório [eShop](https://github.com/dotnet/eShop/tree/main).
-2) Funcionalidade Escolhida: "**Place an Order**".
+1) Fork and Clone the [eShop](https://github.com/dotnet/eShop/tree/main) repository.
+2) Chosen Feature: "**Place an Order**".
 3) Exploração da Funcionalidade
-4) Implementação de Tracing.
-5) Implementação de Jaeger, Prometheus, e Grafana.
-6) Masking: Implementação dum [Processor](PiiScrubberProcessor.cs) para mascarar os dados sensíveis.
-7) Configuração dos Dockers e das Ferramentas para Monitorizar as Métricas:
+4) Tracing implementation.
+5) Jaeger, Prometheus, and Grafana implementations.
+6) Masking: Implementation of a [Processor](PiiScrubberProcessor.cs) to mask sensitive data.
+7) Configuration of Dockers and Tools to Monitor Metrics:
     - [docker-compose.observability.yml](docker-compose.observability.yml).
     - [prometheus.yml](prometheus/prometheus.yml).
     - [datasources.yml](grafana/provisioning/datasources/datasources.yml).
     - [dashboard.yml](grafana/provisioning/dashboards/dashboards.yml).
     - [grafanaDashboard.json](grafana/provisioning/dashboards/grafanaDashboard.json).
-8) Load Tests: Implementados usando K6: [loadTest.cs](loadTest.cs) (implementado parcialmente)
+8) Load Tests: Implemented using *K6*: [loadTest.cs](loadTest.cs).
 
-### 3. Como construir e correr o ambient eShop:
-Na pasta do projeto (eShop):
+### 3. Running the Project:
+In project's folder (**eShop**):
 ```
 docker-compose -f docker-compose.observability.yml up -d
 
 dotnet run --project src/eShop.AppHost/eShop.AppHost.csproj
 ```
 
-Para os testes de carga (não implementado totalmente), correr:
+For the load tests, run:
 ```
 k6 run loadTest.js
 ```
 
-### 4. Diagrama (Esboço Inicial):
-![Diagrama](img/diagrama.png)
+(verify traces/metrics in [Jaeger](http://localhost:16686), [Prometheus](http://localhost:9090), and [Grafana](http://localhost:3000))
 
-### 5. Links Úteis:
+### 4. Diagram:
+![Diagram](img/diagrama.png)
+
+### 5. Useful Links:
 - AdventureWorks website: https://localhost:7298
 ![Adventure Works](img/adventure_works.png)
 
@@ -61,7 +63,9 @@ k6 run loadTest.js
 - Grafana: http://localhost:3000
 ![Grafana](img/grafana.png)
 
-### 6. Trabalho Futuro:
-- Melhorar Aspetos de Segurança.
-- Corrigir Testes de Carga.
-- Adicionar mais visualizações.
+### 6. Modified/Created code files:
+
+### 7. Future Work:
+- Improve security aspects.
+- Add more load tests.
+- Add more views and metrics.

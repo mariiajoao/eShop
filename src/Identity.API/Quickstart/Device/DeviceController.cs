@@ -39,7 +39,7 @@ public class DeviceController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
+    // [ValidateAntiForgeryToken]
     public async Task<IActionResult> UserCodeCapture(string userCode)
     {
         var vm = await BuildViewModelAsync(userCode);
@@ -49,7 +49,7 @@ public class DeviceController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
+    // [ValidateAntiForgeryToken]
     public async Task<IActionResult> Callback(DeviceAuthorizationInputModel model)
     {
         if (model == null) throw new ArgumentNullException(nameof(model));
