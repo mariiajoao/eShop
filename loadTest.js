@@ -19,7 +19,7 @@ export default function () {
 
     // Log in as a user
     // ! Replace the URL with the login URL of the application
-    let url = 'https://localhost:5243/Account/Login?ReturnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Frequest_uri%3Durn%253Aietf%253Aparams%253Aoauth%253Arequest_uri%253A66D714483C41C7BE9D813CD505C994811D5AAE2365CAF861DAEE5DDED6D96C68%26client_id%3Dwebapp';
+    let url = 'https://localhost:5243/Account/Login?ReturnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Frequest_uri%3Durn%253Aietf%253Aparams%253Aoauth%253Arequest_uri%253ACBDE0EF1536F56FCD98A941A94AFCE9FCECFE7833B2C745A097CE32CD5B04633%26client_id%3Dwebapp';
     res = http.post(
         url,
         {

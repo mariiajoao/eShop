@@ -34,6 +34,8 @@ For the load tests, run:
 k6 run loadTest.js
 ```
 
+![k6](img/k6.png)
+
 Verify traces/metrics in:
 - [Jaeger](http://localhost:16686)
 - [Prometheus](http://localhost:9090)
